@@ -1,6 +1,6 @@
 {
   "data": "2026-06-26",
-  "gerado_em": "2026-06-26T13:08:52.464863",
+  "gerado_em": "2026-06-26T13:54:15.868665",
   "total": 2,
   "entrar": 0,
   "recomendacoes": [
@@ -10,12 +10,12 @@
       "horario": "2026-06-26T20:00:00+00:00",
       "mercado": "NAO_OPERAR",
       "lado": null,
-      "probabilidade": 73.5,
-      "indice_qualidade": 77.3,
-      "confianca": 73.5,
+      "probabilidade": 74.7,
+      "indice_qualidade": 76.3,
+      "confianca": 74.7,
       "risco": "ALTO",
       "justificativas": [
-        "Índice de qualidade abaixo do mínimo: 77.3/100",
+        "Índice de qualidade abaixo do mínimo: 76.3/100",
         "Nenhum mercado atingiu critérios mínimos de confiança."
       ],
       "status": "NAO_OPERAR"
@@ -26,12 +26,12 @@
       "horario": "2026-06-26T16:30:00+00:00",
       "mercado": "NAO_OPERAR",
       "lado": null,
-      "probabilidade": 66.1,
-      "indice_qualidade": 70.9,
-      "confianca": 66.1,
+      "probabilidade": 68.6,
+      "indice_qualidade": 72.0,
+      "confianca": 68.6,
       "risco": "ALTO",
       "justificativas": [
-        "Índice de qualidade abaixo do mínimo: 70.9/100",
+        "Índice de qualidade abaixo do mínimo: 72.0/100",
         "Nenhum mercado atingiu critérios mínimos de confiança."
       ],
       "status": "NAO_OPERAR"
