@@ -1,0 +1,40 @@
+{
+  "data": "2026-06-26",
+  "gerado_em": "2026-06-26T05:39:59.555581",
+  "total": 2,
+  "entrar": 0,
+  "recomendacoes": [
+    {
+      "jogo": "Flamengo x Palmeiras",
+      "campeonato": "Brasileirão Série A",
+      "horario": "2026-06-26T20:00:00+00:00",
+      "mercado": "NAO_OPERAR",
+      "lado": null,
+      "probabilidade": 71.2,
+      "indice_qualidade": 73.5,
+      "confianca": 71.2,
+      "risco": "ALTO",
+      "justificativas": [
+        "Índice de qualidade abaixo do mínimo: 73.5/100",
+        "Nenhum mercado atingiu critérios mínimos de confiança."
+      ],
+      "status": "NAO_OPERAR"
+    },
+    {
+      "jogo": "Manchester City x Arsenal",
+      "campeonato": "Premier League",
+      "horario": "2026-06-26T16:30:00+00:00",
+      "mercado": "NAO_OPERAR",
+      "lado": null,
+      "probabilidade": 71.7,
+      "indice_qualidade": 75.6,
+      "confianca": 71.7,
+      "risco": "ALTO",
+      "justificativas": [
+        "Índice de qualidade abaixo do mínimo: 75.6/100",
+        "Nenhum mercado atingiu critérios mínimos de confiança."
+      ],
+      "status": "NAO_OPERAR"
+    }
+  ]
+}
