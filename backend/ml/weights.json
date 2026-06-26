@@ -1,0 +1,17 @@
+{
+  "lay_goleada": {
+    "media_gols_marcados": 0.30,
+    "xg": 0.25,
+    "odd_lay": 0.20,
+    "historico_goleadas": 0.15,
+    "diferenca_elo": 0.10
+  },
+  "lay_0x0": {
+    "media_gols_primeiro_tempo": 0.35,
+    "xg_total": 0.30,
+    "odd_lay_0x0": 0.25,
+    "historico_0x0": 0.10
+  },
+  "versao": "1.0.0",
+  "atualizado_em": "2025-01-01"
+}

@@ -1,0 +1,75 @@
+{
+  "data": "2025-01-15",
+  "gerado_em": "2025-01-15T11:00:00",
+  "total": 4,
+  "entrar": 2,
+  "recomendacoes": [
+    {
+      "jogo": "Flamengo x Palmeiras",
+      "campeonato": "Brasileirão Série A",
+      "horario": "2025-01-15T20:00:00-03:00",
+      "mercado": "LAY_GOLEADA",
+      "lado": "VISITANTE",
+      "probabilidade": 82.5,
+      "indice_qualidade": 91.3,
+      "confianca": 82.5,
+      "risco": "BAIXO",
+      "justificativas": [
+        "Palmeiras marca em média 1.2 gols/jogo — baixo volume ofensivo.",
+        "xG esperado de 0.9 — chance de goleada reduzida.",
+        "Odd Lay de 3.20 indica mercado favorável à operação.",
+        "Apenas 1 goleada nos últimos 10 jogos — bom histórico."
+      ],
+      "status": "ENTRAR"
+    },
+    {
+      "jogo": "Manchester City x Arsenal",
+      "campeonato": "Premier League",
+      "horario": "2025-01-15T16:30:00-03:00",
+      "mercado": "LAY_0X0",
+      "lado": null,
+      "probabilidade": 78.2,
+      "indice_qualidade": 88.7,
+      "confianca": 78.2,
+      "risco": "MEDIO",
+      "justificativas": [
+        "Média combinada de 3.4 gols/jogo — partida tende a ter gols.",
+        "xG total esperado de 3.1 — alta probabilidade de sair do 0x0.",
+        "Estratégia: fechar ao primeiro gol ou obrigatoriamente aos 65 minutos."
+      ],
+      "status": "ENTRAR"
+    },
+    {
+      "jogo": "Corinthians x Santos",
+      "campeonato": "Brasileirão Série A",
+      "horario": "2025-01-15T18:30:00-03:00",
+      "mercado": "NAO_OPERAR",
+      "lado": null,
+      "probabilidade": 61.0,
+      "indice_qualidade": 73.2,
+      "confianca": 61.0,
+      "risco": "ALTO",
+      "justificativas": [
+        "Índice de qualidade abaixo do mínimo: 73.2/100",
+        "Nenhum mercado atingiu critérios mínimos de confiança."
+      ],
+      "status": "NAO_OPERAR"
+    },
+    {
+      "jogo": "Barcelona x Real Madrid",
+      "campeonato": "La Liga",
+      "horario": "2025-01-15T17:00:00-03:00",
+      "mercado": "NAO_OPERAR",
+      "lado": null,
+      "probabilidade": 55.0,
+      "indice_qualidade": 70.1,
+      "confianca": 55.0,
+      "risco": "ALTO",
+      "justificativas": [
+        "Índice de qualidade abaixo do mínimo: 70.1/100",
+        "Indicadores divergem — operação não recomendada."
+      ],
+      "status": "NAO_OPERAR"
+    }
+  ]
+}

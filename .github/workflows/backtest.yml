@@ -1,0 +1,54 @@
+name: 🔬 Backtest Semanal
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'  # Toda segunda-feira ao meio-dia UTC
+  workflow_dispatch:
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Instalar dependências
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: 📥 Baixar dados históricos
+        run: |
+          cd backend
+          python scripts/download_historical.py
+
+      - name: 🔬 Rodar backtest
+        run: |
+          cd backend
+          python -m ml.backtest
+        env:
+          DB_PATH: ${{ github.workspace }}/data/lay_goleada.db
+
+      - name: 📈 Publicar relatório de backtest
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-report-${{ github.run_id }}
+          path: data/backtest_report_*.json
+          retention-days: 90
+
+      - name: 💾 Salvar pesos calibrados
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions"
+          git add backend/ml/weights.json data/backtest_report_*.json
+          git diff --staged --quiet || git commit -m "🔬 Backtest semanal - pesos atualizados $(date +'%d/%m/%Y')"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

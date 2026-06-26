@@ -1,0 +1,58 @@
+name: 📊 Análise Diária
+
+on:
+  schedule:
+    - cron: '0 11 * * *'  # 8h horário de Brasília (UTC-3)
+  workflow_dispatch:       # Permite rodar manualmente pelo GitHub
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Instalar dependências
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: 🗄️ Inicializar banco de dados
+        run: |
+          cd backend
+          python db/init_db.py
+        env:
+          DB_PATH: ${{ github.workspace }}/data/lay_goleada.db
+
+      - name: ⚽ Rodar análise do dia
+        run: |
+          cd backend
+          python -m scripts.run_analysis
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          FOOTBALL_API_KEY: ${{ secrets.FOOTBALL_API_KEY }}
+          DB_PATH: ${{ github.workspace }}/data/lay_goleada.db
+
+      - name: 💾 Salvar resultados como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: recomendacoes-${{ github.run_id }}
+          path: data/recomendacoes_*.json
+          retention-days: 30
+
+      - name: 🔄 Commit dos dados atualizados
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions"
+          git add data/
+          git diff --staged --quiet || git commit -m "📊 Recomendações do dia $(date +'%d/%m/%Y')"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
