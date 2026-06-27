@@ -1,8 +1,8 @@
 {
   "data": "2026-06-27",
-  "gerado_em": "2026-06-27T04:48:51.059992",
+  "gerado_em": "2026-06-27T05:00:37.997077",
   "total": 2,
-  "entrar": 1,
+  "entrar": 2,
   "recomendacoes": [
     {
       "jogo": "Flamengo x Palmeiras",
@@ -10,13 +10,13 @@
       "horario": "2026-06-27T20:00:00+00:00",
       "mercado": "LAY_0X0",
       "lado": null,
-      "probabilidade": 81.2,
-      "indice_qualidade": 83.5,
-      "confianca": 81.2,
+      "probabilidade": 90.4,
+      "indice_qualidade": 91.0,
+      "confianca": 90.4,
       "risco": "BAIXO",
       "justificativas": [
-        "Média combinada de 3.4 gols/jogo — partida tende a ter gols.",
-        "xG total esperado de 2.9 — alta probabilidade de sair do 0x0.",
+        "Média combinada de 4.0 gols/jogo — partida tende a ter gols.",
+        "xG total esperado de 3.4 — alta probabilidade de sair do 0x0.",
         "Estratégia: fechar ao primeiro gol ou obrigatoriamente aos 65 minutos."
       ],
       "status": "ENTRAR"
@@ -25,17 +25,18 @@
       "jogo": "Manchester City x Arsenal",
       "campeonato": "Premier League",
       "horario": "2026-06-27T16:30:00+00:00",
-      "mercado": "NAO_OPERAR",
+      "mercado": "LAY_0X0",
       "lado": null,
-      "probabilidade": 62.2,
-      "indice_qualidade": 67.3,
-      "confianca": 62.2,
-      "risco": "ALTO",
+      "probabilidade": 77.4,
+      "indice_qualidade": 80.6,
+      "confianca": 77.4,
+      "risco": "BAIXO",
       "justificativas": [
-        "Índice de qualidade abaixo do mínimo: 67.3/100",
-        "Nenhum mercado atingiu critérios mínimos de confiança."
+        "Média combinada de 3.3 gols/jogo — partida tende a ter gols.",
+        "xG total esperado de 2.9 — alta probabilidade de sair do 0x0.",
+        "Estratégia: fechar ao primeiro gol ou obrigatoriamente aos 65 minutos."
       ],
-      "status": "NAO_OPERAR"
+      "status": "ENTRAR"
     }
   ]
 }
