@@ -4,6 +4,25 @@ import Header from "./components/Header"
 import FiltroBar from "./components/FiltroBar"
 import Resumo from "./components/Resumo"
 
+const REPO = "football-ai-trading"
+const USUARIO = "josedobigose"
+
+function getUrls(data) {
+  return [
+    `https://${USUARIO}.github.io/${REPO}/data/recomendacoes_${data}.json`,
+  ]
+}
+
+function getDatasParaTentar() {
+  const datas = []
+  for (let i = 0; i <= 1; i++) {
+    const d = new Date()
+    d.setUTCDate(d.getUTCDate() - i)
+    datas.push(d.toISOString().split("T")[0])
+  }
+  return datas
+}
+
 export default function App() {
   const [dados, setDados] = useState(null)
   const [filtro, setFiltro] = useState("TODOS")
@@ -11,12 +30,8 @@ export default function App() {
   const [erro, setErro] = useState(null)
 
   useEffect(() => {
-    const hoje = new Date().toISOString().split("T")[0]
-    const urls = [
-      `/football-ai-trading/data/recomendacoes_${hoje}.json`,
-      `./data/recomendacoes_${hoje}.json`,
-      `/data/recomendacoes_${hoje}.json`,
-    ]
+    const datas = getDatasParaTentar()
+    const urls = datas.flatMap(getUrls)
 
     const tentarUrl = (index) => {
       if (index >= urls.length) {
@@ -25,10 +40,7 @@ export default function App() {
         return
       }
       fetch(urls[index])
-        .then(r => {
-          if (!r.ok) throw new Error("não encontrado")
-          return r.json()
-        })
+        .then(r => { if (!r.ok) throw new Error(); return r.json() })
         .then(d => { setDados(d); setLoading(false) })
         .catch(() => tentarUrl(index + 1))
     }
