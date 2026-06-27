@@ -24,7 +24,7 @@ CAMPEONATOS = {
 }
 
 MAX_POR_CAMPEONATO = 2
-INDICE_MINIMO = 85.0
+INDICE_MINIMO = 70.0
 
 
 def _carregar_pesos() -> dict:
