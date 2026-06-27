@@ -10,39 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
-      - name: 📥 Checkout do repositório
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🐍 Configurar Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
       - name: 📦 Instalar dependências
-        run: |
-          cd backend
-          pip install -r requirements.txt
+        run: cd backend && pip install -r requirements.txt
 
-      - name: 🗄️ Inicializar banco de dados
-        run: |
-          cd backend
-          python db/init_db.py
+      - name: 🗄️ Banco de dados
+        run: cd backend && python db/init_db.py
         env:
           DB_PATH: ${{ github.workspace }}/data/lay_goleada.db
 
-      - name: ⚽ Rodar análise do dia
-        run: |
-          cd backend
-          python -m scripts.run_analysis
+      - name: ⚽ Rodar análise
+        run: cd backend && python -m scripts.run_analysis
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           FOOTBALL_API_KEY: ${{ secrets.FOOTBALL_API_KEY }}
           DB_PATH: ${{ github.workspace }}/data/lay_goleada.db
 
-      - name: 💾 Commit dos dados atualizados
+      - name: 💾 Commit dados
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions"
@@ -62,32 +53,29 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: 📦 Instalar dependências
+        run: cd frontend && npm install
+
+      - name: 📋 Copiar JSONs para public
         run: |
-          cd frontend
-          npm install
+          mkdir -p frontend/public/data
+          cp data/recomendacoes_*.json frontend/public/data/
 
       - name: 🏗️ Build
-        run: |
-          cd frontend
-          npm run build
+        run: cd frontend && npm run build
         env:
           VITE_BASE_URL: /football-ai-trading
 
-      - name: ⬆️ Upload Pages
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
 
