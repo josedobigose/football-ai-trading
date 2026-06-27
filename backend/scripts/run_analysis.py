@@ -1,6 +1,6 @@
 """
-Script principal de análise diária.
-Executado pelo GitHub Actions todo dia às 8h.
+Script principal de análise diária v2.
+Foco: Lay 0x0 nos 6 campeonatos europeus selecionados.
 """
 
 import json
@@ -9,131 +9,111 @@ import os
 from datetime import date, datetime
 from pathlib import Path
 
-from collectors.data_collector import (
-    buscar_jogos_do_dia,
-    buscar_odds,
-    buscar_estatisticas,
-)
-from engine.scoring import MotorScoring, DadosJogo
+from collectors.data_collector import buscar_jogos_do_dia, buscar_odds, buscar_estatisticas
+from engine.scoring import MotorScoring, DadosJogo, CAMPEONATOS, selecionar_melhores_por_campeonato
 from db.init_db import get_connection, init_db
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = Path(__file__).parent.parent.parent / "data"
 
 
 def run():
-    logger.info("🚀 Iniciando análise diária...")
+    logger.info("🚀 Iniciando análise diária v2...")
     init_db()
 
-    jogos = buscar_jogos_do_dia()
+    todos_jogos = buscar_jogos_do_dia()
     motor = MotorScoring()
     conn = get_connection()
-    recomendacoes_saida = []
 
-    for jogo in jogos:
+    # Filtra apenas os campeonatos monitorados
+    jogos_monitorados = [j for j in todos_jogos if j.get("liga_id") in CAMPEONATOS]
+    logger.info(f"📋 {len(jogos_monitorados)} jogos nos campeonatos monitorados")
+
+    pares = []
+    for jogo in jogos_monitorados:
         try:
-            # Buscar odds
-            odds = buscar_odds(
-                jogo["time_casa"],
-                jogo["time_visitante"],
-                jogo.get("liga_id", 39)
-            )
+            odds = buscar_odds(jogo["time_casa"], jogo["time_visitante"], jogo.get("liga_id", 39))
+            stats = buscar_estatisticas(jogo.get("fixture_id", 0), jogo.get("liga_id", 39))
 
-            # Buscar estatísticas
-            stats = buscar_estatisticas(
-                jogo.get("fixture_id", 0),
-                jogo.get("liga_id", 39)
-            )
-
-            # Montar objeto de dados
             dados = DadosJogo(
                 fixture_id=jogo.get("fixture_id", 0),
                 campeonato=jogo["campeonato"],
+                liga_id=jogo.get("liga_id", 39),
                 time_casa=jogo["time_casa"],
                 time_visitante=jogo["time_visitante"],
                 horario=jogo["horario"],
-                media_gols_marcados_casa=stats.get("media_gols_marcados_casa", 1.2),
+                media_gols_marcados_casa=stats.get("media_gols_marcados_casa", 1.5),
                 media_gols_sofridos_casa=stats.get("media_gols_sofridos_casa", 1.0),
-                media_gols_marcados_visitante=stats.get("media_gols_marcados_visitante", 0.9),
+                media_gols_marcados_visitante=stats.get("media_gols_marcados_visitante", 1.2),
                 media_gols_sofridos_visitante=stats.get("media_gols_sofridos_visitante", 1.3),
-                xg_casa=stats.get("xg_casa", 1.2),
-                xg_visitante=stats.get("xg_visitante", 0.9),
+                xg_casa=stats.get("xg_casa", 1.4),
+                xg_visitante=stats.get("xg_visitante", 1.1),
                 historico_goleadas_casa=stats.get("historico_goleadas_casa", 1),
                 historico_goleadas_visitante=stats.get("historico_goleadas_visitante", 1),
+                historico_0x0_casa=stats.get("historico_0x0_casa", 1),
+                historico_0x0_visitante=stats.get("historico_0x0_visitante", 1),
                 elo_casa=stats.get("elo_casa", 1600.0),
                 elo_visitante=stats.get("elo_visitante", 1550.0),
-                odd_lay_goleada_casa=odds.get("odd_lay_goleada_casa", 2.0),
-                odd_lay_goleada_visitante=odds.get("odd_lay_goleada_visitante", 3.0),
-                odd_lay_0x0=odds.get("odd_lay_0x0", 1.5),
+                odd_lay_goleada_casa=odds.get("odd_lay_goleada_casa", 2.5),
+                odd_lay_goleada_visitante=odds.get("odd_lay_goleada_visitante", 3.5),
+                odd_lay_0x0=odds.get("odd_lay_0x0", 1.8),
             )
 
-            # Analisar
             rec = motor.analisar(dados)
+            pares.append((dados, rec))
 
-            # Salvar no banco
-            cur = conn.cursor()
-            cur.execute("""
-                INSERT INTO jogos (data, campeonato, time_casa, time_visitante, horario)
-                VALUES (?, ?, ?, ?, ?)
-            """, (
-                date.today().isoformat(),
-                jogo["campeonato"],
-                jogo["time_casa"],
-                jogo["time_visitante"],
-                jogo["horario"],
-            ))
-            jogo_id = cur.lastrowid
-
-            cur.execute("""
-                INSERT INTO recomendacoes
-                (jogo_id, mercado, lado, probabilidade, indice_qualidade,
-                 confianca, risco, justificativas, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                jogo_id,
-                rec.mercado,
-                rec.lado,
-                rec.probabilidade,
-                rec.indice_qualidade,
-                rec.confianca,
-                rec.risco,
-                json.dumps(rec.justificativas, ensure_ascii=False),
-                rec.status,
-            ))
-            conn.commit()
-
-            # Montar JSON de saída
-            recomendacoes_saida.append({
-                "jogo": f"{jogo['time_casa']} x {jogo['time_visitante']}",
-                "campeonato": jogo["campeonato"],
-                "horario": jogo["horario"],
-                "mercado": rec.mercado,
-                "lado": rec.lado,
-                "probabilidade": rec.probabilidade,
-                "indice_qualidade": rec.indice_qualidade,
-                "confianca": rec.confianca,
-                "risco": rec.risco,
-                "justificativas": rec.justificativas,
-                "status": rec.status,
-            })
-
-            status_emoji = "✅" if rec.status == "ENTRAR" else "⏭️"
-            logger.info(
-                f"{status_emoji} {jogo['time_casa']} x {jogo['time_visitante']} "
-                f"→ {rec.mercado} {rec.lado or ''} | IQ: {rec.indice_qualidade}"
-            )
+            emoji = "✅" if rec.status == "ENTRAR" else "⏭️"
+            logger.info(f"{emoji} {jogo['time_casa']} x {jogo['time_visitante']} ({jogo['campeonato']}) → {rec.mercado} IQ:{rec.indice_qualidade}")
 
         except Exception as e:
-            logger.error(f"Erro ao analisar {jogo.get('time_casa')} x {jogo.get('time_visitante')}: {e}")
+            logger.error(f"Erro: {jogo.get('time_casa')} x {jogo.get('time_visitante')}: {e}")
 
+    # Seleciona os 2 melhores por campeonato
+    melhores = selecionar_melhores_por_campeonato(pares)
+    logger.info(f"🏆 {len(melhores)} jogos selecionados (top 2 por campeonato, IQ >= 85)")
+
+    # Salva no banco e monta JSON
+    recomendacoes_saida = []
+    cur = conn.cursor()
+
+    for rec in melhores:
+        d = rec.dados
+        cur.execute("""
+            INSERT INTO jogos (data, campeonato, time_casa, time_visitante, horario)
+            VALUES (?, ?, ?, ?, ?)
+        """, (date.today().isoformat(), d.campeonato, d.time_casa, d.time_visitante, d.horario))
+        jogo_id = cur.lastrowid
+
+        cur.execute("""
+            INSERT INTO recomendacoes
+            (jogo_id, mercado, lado, probabilidade, indice_qualidade, confianca, risco, justificativas, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            jogo_id, rec.mercado, rec.lado, rec.probabilidade,
+            rec.indice_qualidade, rec.confianca, rec.risco,
+            json.dumps(rec.justificativas, ensure_ascii=False), rec.status
+        ))
+
+        recomendacoes_saida.append({
+            "jogo": f"{d.time_casa} x {d.time_visitante}",
+            "campeonato": d.campeonato,
+            "horario": d.horario,
+            "mercado": rec.mercado,
+            "lado": rec.lado,
+            "probabilidade": rec.probabilidade,
+            "indice_qualidade": rec.indice_qualidade,
+            "confianca": rec.confianca,
+            "risco": rec.risco,
+            "justificativas": rec.justificativas,
+            "status": rec.status,
+        })
+
+    conn.commit()
     conn.close()
 
-    # Salvar JSON para o frontend
+    # Salva JSON
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     hoje = date.today().strftime("%Y-%m-%d")
     output_path = OUTPUT_DIR / f"recomendacoes_{hoje}.json"
@@ -143,12 +123,12 @@ def run():
             "data": hoje,
             "gerado_em": datetime.now().isoformat(),
             "total": len(recomendacoes_saida),
-            "entrar": sum(1 for r in recomendacoes_saida if r["status"] == "ENTRAR"),
+            "entrar": len(recomendacoes_saida),
+            "campeonatos_monitorados": list(CAMPEONATOS.values()),
             "recomendacoes": recomendacoes_saida,
         }, f, ensure_ascii=False, indent=2)
 
-    logger.info(f"✅ Análise concluída. {len(recomendacoes_saida)} jogos processados.")
-    logger.info(f"📄 Resultado salvo em: {output_path}")
+    logger.info(f"✅ {len(recomendacoes_saida)} recomendações salvas em {output_path}")
 
 
 if __name__ == "__main__":
