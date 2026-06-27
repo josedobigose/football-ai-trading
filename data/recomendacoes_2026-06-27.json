@@ -1,42 +1,15 @@
 {
   "data": "2026-06-27",
-  "gerado_em": "2026-06-27T05:00:37.997077",
-  "total": 2,
-  "entrar": 2,
-  "recomendacoes": [
-    {
-      "jogo": "Flamengo x Palmeiras",
-      "campeonato": "Brasileirão Série A",
-      "horario": "2026-06-27T20:00:00+00:00",
-      "mercado": "LAY_0X0",
-      "lado": null,
-      "probabilidade": 90.4,
-      "indice_qualidade": 91.0,
-      "confianca": 90.4,
-      "risco": "BAIXO",
-      "justificativas": [
-        "Média combinada de 4.0 gols/jogo — partida tende a ter gols.",
-        "xG total esperado de 3.4 — alta probabilidade de sair do 0x0.",
-        "Estratégia: fechar ao primeiro gol ou obrigatoriamente aos 65 minutos."
-      ],
-      "status": "ENTRAR"
-    },
-    {
-      "jogo": "Manchester City x Arsenal",
-      "campeonato": "Premier League",
-      "horario": "2026-06-27T16:30:00+00:00",
-      "mercado": "LAY_0X0",
-      "lado": null,
-      "probabilidade": 77.4,
-      "indice_qualidade": 80.6,
-      "confianca": 77.4,
-      "risco": "BAIXO",
-      "justificativas": [
-        "Média combinada de 3.3 gols/jogo — partida tende a ter gols.",
-        "xG total esperado de 2.9 — alta probabilidade de sair do 0x0.",
-        "Estratégia: fechar ao primeiro gol ou obrigatoriamente aos 65 minutos."
-      ],
-      "status": "ENTRAR"
-    }
-  ]
+  "gerado_em": "2026-06-27T05:21:43.111020",
+  "total": 0,
+  "entrar": 0,
+  "campeonatos_monitorados": [
+    "Bundesliga",
+    "Premier League",
+    "La Liga",
+    "Serie A",
+    "Bundesliga 2",
+    "Ligue 1"
+  ],
+  "recomendacoes": []
 }
