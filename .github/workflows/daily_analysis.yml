@@ -65,15 +65,13 @@ jobs:
       - name: 📦 Instalar dependências
         run: cd frontend && npm install
 
-      - name: 📋 Copiar JSONs para public
+      - name: 📋 Copiar JSONs para public/data
         run: |
           mkdir -p frontend/public/data
           cp data/recomendacoes_*.json frontend/public/data/
 
       - name: 🏗️ Build
         run: cd frontend && npm run build
-        env:
-          VITE_BASE_URL: /football-ai-trading
 
       - uses: actions/upload-pages-artifact@v3
         with:
