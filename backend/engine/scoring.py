@@ -16,6 +16,8 @@ CAMPEONATOS = {
     79:  "Bundesliga 2",
     61:  "Ligue 1",
     1:   "Copa do Mundo",
+    71:  "Brasileirao Serie A",
+    72:  "Brasileirao Serie B",
 }
 
 INDICE_MINIMO = 50.0
