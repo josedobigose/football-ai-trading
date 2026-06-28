@@ -1,8 +1,3 @@
-"""
-Motor de scoring v2 — foco em Lay 0x0 com Lay Goleada como segunda opção.
-Campeonatos: Bundesliga, Premier League, La Liga, Serie A, Bundesliga 2, Ligue 1
-"""
-
 import json
 import logging
 from dataclasses import dataclass, field
@@ -13,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 WEIGHTS_PATH = Path(__file__).parent.parent / "ml" / "weights.json"
 
-# Campeonatos monitorados (ID API-Football -> nome)
 CAMPEONATOS = {
     78:  "Bundesliga",
     39:  "Premier League",
@@ -21,9 +15,9 @@ CAMPEONATOS = {
     135: "Serie A",
     79:  "Bundesliga 2",
     61:  "Ligue 1",
+    1:   "Copa do Mundo",
 }
 
-MAX_POR_CAMPEONATO = 2
 INDICE_MINIMO = 50.0
 
 
@@ -61,29 +55,27 @@ class DadosJogo:
     time_casa: str
     time_visitante: str
     horario: str
-
-    media_gols_marcados_casa: float = 1.5
-    media_gols_sofridos_casa: float = 1.0
-    media_gols_marcados_visitante: float = 1.2
-    media_gols_sofridos_visitante: float = 1.3
-    xg_casa: float = 1.4
-    xg_visitante: float = 1.1
+    media_gols_marcados_casa: float = 1.8
+    media_gols_sofridos_casa: float = 1.2
+    media_gols_marcados_visitante: float = 1.5
+    media_gols_sofridos_visitante: float = 1.4
+    xg_casa: float = 1.6
+    xg_visitante: float = 1.3
     historico_goleadas_casa: int = 1
     historico_goleadas_visitante: int = 1
-    historico_0x0_casa: int = 1      # qtd de jogos 0x0 nos últimos 10
+    historico_0x0_casa: int = 1
     historico_0x0_visitante: int = 1
-    elo_casa: float = 1600.0
-    elo_visitante: float = 1550.0
-
-    odd_lay_goleada_casa: float = 2.5
-    odd_lay_goleada_visitante: float = 3.5
-    odd_lay_0x0: float = 1.8
+    elo_casa: float = 1650.0
+    elo_visitante: float = 1600.0
+    odd_lay_goleada_casa: float = 3.5
+    odd_lay_goleada_visitante: float = 5.0
+    odd_lay_0x0: float = 2.5
 
 
 @dataclass
 class Recomendacao:
-    mercado: str           # LAY_0X0 | LAY_GOLEADA | NAO_OPERAR
-    lado: Optional[str]    # CASA | VISITANTE | None
+    mercado: str
+    lado: Optional[str]
     probabilidade: float
     indice_qualidade: float
     confianca: float
@@ -99,11 +91,8 @@ class MotorScoring:
         self.pesos = _carregar_pesos()
 
     def analisar(self, dados: DadosJogo) -> Recomendacao:
-        """Prioriza Lay 0x0, usa Lay Goleada como segunda opção."""
-
         score_0x0 = self._score_lay_0x0(dados)
 
-        # Tenta Lay 0x0 primeiro
         if score_0x0["indice_qualidade"] >= INDICE_MINIMO:
             return Recomendacao(
                 mercado="LAY_0X0",
@@ -117,14 +106,12 @@ class MotorScoring:
                 dados=dados
             )
 
-        # Segunda opção: Lay Goleada
         score_lg_casa = self._score_lay_goleada(dados, "CASA")
         score_lg_vis = self._score_lay_goleada(dados, "VISITANTE")
-        melhor_lg = max(
+        lado_lg, score_lg = max(
             [("CASA", score_lg_casa), ("VISITANTE", score_lg_vis)],
             key=lambda x: x[1]["indice_qualidade"]
         )
-        lado_lg, score_lg = melhor_lg
 
         if score_lg["indice_qualidade"] >= INDICE_MINIMO:
             return Recomendacao(
@@ -139,12 +126,7 @@ class MotorScoring:
                 dados=dados
             )
 
-        # Melhor score entre todos para mostrar no NAO_OPERAR
-        melhor_iq = max(
-            score_0x0["indice_qualidade"],
-            score_lg["indice_qualidade"]
-        )
-
+        melhor_iq = max(score_0x0["indice_qualidade"], score_lg["indice_qualidade"])
         return Recomendacao(
             mercado="NAO_OPERAR",
             lado=None,
@@ -152,10 +134,7 @@ class MotorScoring:
             indice_qualidade=melhor_iq,
             confianca=score_0x0["confianca"],
             risco="ALTO",
-            justificativas=[
-                f"Índice de qualidade abaixo do mínimo ({INDICE_MINIMO}): {melhor_iq:.1f}/100",
-                "Nenhum mercado atingiu critérios mínimos de confiança."
-            ],
+            justificativas=[f"Índice abaixo do mínimo: {melhor_iq:.1f}/100"],
             status="NAO_OPERAR",
             dados=dados
         )
@@ -163,15 +142,14 @@ class MotorScoring:
     def _score_lay_0x0(self, d: DadosJogo) -> dict:
         pesos = self.pesos["lay_0x0"]
 
-        xg_total = d.xg_casa + d.xg_visitante
         media_gols_total = d.media_gols_marcados_casa + d.media_gols_marcados_visitante
+        xg_total = d.xg_casa + d.xg_visitante
         historico_0x0_medio = (d.historico_0x0_casa + d.historico_0x0_visitante) / 2
 
-        # Componentes — quanto maior = mais chance de gol = melhor para Lay 0x0
         comp_gols = min(1.0, media_gols_total / 4.0)
         comp_xg = min(1.0, xg_total / 4.0)
-        comp_odd = min(1.0, (d.odd_lay_0x0 - 1.0) / 3.0)  # odd alta = mercado precifica menos chance de 0x0
-        comp_hist = max(0.0, 1.0 - (historico_0x0_medio / 4.0))  # menos 0x0 no histórico = melhor
+        comp_odd = min(1.0, (d.odd_lay_0x0 - 1.0) / 3.0)
+        comp_hist = max(0.0, 1.0 - (historico_0x0_medio / 4.0))
 
         score = (
             comp_gols * pesos["media_gols_total"] +
@@ -185,21 +163,15 @@ class MotorScoring:
         risco = "BAIXO" if d.odd_lay_0x0 > 2.0 else ("MEDIO" if d.odd_lay_0x0 > 1.5 else "ALTO")
 
         justificativas = []
-        if comp_gols > 0.6:
+        if comp_gols > 0.5:
             justificativas.append(f"Média combinada de {media_gols_total:.1f} gols/jogo — alta ofensividade.")
-        if comp_xg > 0.6:
-            justificativas.append(f"xG total esperado de {xg_total:.1f} — alta probabilidade de gol.")
-        if comp_hist > 0.7:
-            justificativas.append(f"Histórico de apenas {historico_0x0_medio:.0f} jogos 0x0 em 10 — times tendem a marcar.")
-        justificativas.append("Fechar obrigatoriamente ao 1º gol ou aos 65 minutos.")
+        if comp_xg > 0.5:
+            justificativas.append(f"xG total de {xg_total:.1f} — alta probabilidade de gol.")
+        if comp_hist > 0.6:
+            justificativas.append(f"Histórico baixo de jogos 0x0 — times tendem a marcar.")
+        justificativas.append("Fechar ao 1º gol ou obrigatoriamente aos 65 minutos.")
 
-        return {
-            "probabilidade": probabilidade,
-            "indice_qualidade": iq,
-            "confianca": probabilidade,
-            "risco": risco,
-            "justificativas": justificativas,
-        }
+        return {"probabilidade": probabilidade, "indice_qualidade": iq, "confianca": probabilidade, "risco": risco, "justificativas": justificativas}
 
     def _score_lay_goleada(self, d: DadosJogo, lado: str) -> dict:
         pesos = self.pesos["lay_goleada"]
@@ -237,52 +209,19 @@ class MotorScoring:
         risco = "BAIXO" if hist_gol <= 1 else ("MEDIO" if hist_gol <= 2 else "ALTO")
 
         justificativas = []
-        if comp_gols > 0.6:
-            justificativas.append(f"{time} marca em média {media_gols:.1f} gols/jogo — baixo volume ofensivo.")
-        if comp_xg > 0.6:
-            justificativas.append(f"xG esperado de {xg:.1f} — chance de goleada reduzida.")
-        if comp_odd > 0.4:
+        if comp_gols > 0.5:
+            justificativas.append(f"{time} marca em média {media_gols:.1f} gols/jogo.")
+        if comp_xg > 0.5:
+            justificativas.append(f"xG de {xg:.1f} — chance de goleada reduzida.")
+        if comp_odd > 0.3:
             justificativas.append(f"Odd Lay de {odd:.2f} — mercado favorável.")
-        if comp_hist > 0.7:
+        if comp_hist > 0.6:
             justificativas.append(f"Apenas {hist_gol} goleada(s) nos últimos 10 jogos.")
 
-        return {
-            "probabilidade": probabilidade,
-            "indice_qualidade": iq,
-            "confianca": probabilidade,
-            "risco": risco,
-            "justificativas": justificativas,
-        }
+        return {"probabilidade": probabilidade, "indice_qualidade": iq, "confianca": probabilidade, "risco": risco, "justificativas": justificativas}
 
     def _calcular_iq(self, score: float, componentes: list[float]) -> float:
         base = score * 85
         variancia = sum((c - score) ** 2 for c in componentes) / len(componentes)
         bonus = max(0, 15 * (1 - variancia * 4))
         return round(min(100, base + bonus), 1)
-
-
-def selecionar_melhores_por_campeonato(
-    recomendacoes: list[tuple[DadosJogo, Recomendacao]]
-) -> list[Recomendacao]:
-    """
-    Para cada campeonato, seleciona os 2 melhores jogos com status ENTRAR,
-    priorizando Lay 0x0 e depois Lay Goleada, ordenados por índice de qualidade.
-    """
-    from collections import defaultdict
-
-    por_campeonato = defaultdict(list)
-    for dados, rec in recomendacoes:
-        if rec.status == "ENTRAR":
-            por_campeonato[dados.campeonato].append(rec)
-
-    resultado = []
-    for campeonato, recs in por_campeonato.items():
-        # Ordena: Lay 0x0 primeiro, depois por índice de qualidade
-        ordenados = sorted(
-            recs,
-            key=lambda r: (0 if r.mercado == "LAY_0X0" else 1, -r.indice_qualidade)
-        )
-        resultado.extend(ordenados[:MAX_POR_CAMPEONATO])
-
-    # Ordena resultado final por índice de qualidade
-    return sorted(resultado, key=lambda r: -r.indice_qualidade)
