@@ -26,6 +26,8 @@ LIGAS_MONITORADAS = {
     79:  "Bundesliga 2",
     61:  "Ligue 1",
     1:   "Copa do Mundo",
+    71:  "Brasileirao Serie A",
+    72:  "Brasileirao Serie B",
 }
 
 
@@ -131,7 +133,9 @@ def buscar_estatisticas(fixture_id: int, liga_id: int) -> dict:
 
 
 def _liga_para_sport_key(liga_id: int) -> Optional[str]:
-    mapa = {
+    
+    return mapa.get(liga_id)
+mapa = {
         78:  "soccer_germany_bundesliga",
         39:  "soccer_epl",
         140: "soccer_spain_la_liga",
@@ -139,9 +143,9 @@ def _liga_para_sport_key(liga_id: int) -> Optional[str]:
         79:  "soccer_germany_bundesliga2",
         61:  "soccer_france_ligue_one",
         1:   "soccer_fifa_world_cup",
+        71:  "soccer_brazil_campeonato",
+        72:  "soccer_brazil_serie_b",
     }
-    return mapa.get(liga_id)
-
 
 def _extrair_odds(evento: dict) -> dict:
     odds = {"odd_lay_goleada_casa": None, "odd_lay_goleada_visitante": None, "odd_lay_0x0": None}
@@ -175,9 +179,13 @@ def _jogos_exemplo() -> list[dict]:
         {"fixture_id": 1009, "campeonato": "Ligue 1",         "liga_id": 61,  "time_casa": "PSG",               "time_visitante": "Marseille",         "horario": f"{hoje}T20:00:00+00:00"},
         {"fixture_id": 1010, "campeonato": "Ligue 1",         "liga_id": 61,  "time_casa": "Monaco",            "time_visitante": "Lyon",              "horario": f"{hoje}T18:00:00+00:00"},
         {"fixture_id": 1011, "campeonato": "Bundesliga 2",    "liga_id": 79,  "time_casa": "Hamburg",           "time_visitante": "Schalke",           "horario": f"{hoje}T13:30:00+00:00"},
-        {"fixture_id": 1012, "campeonato": "Bundesliga 2",    "liga_id": 79,  "time_casa": "Hannover",          "time_visitante": "Kaiserslautern",    "horario": f"{hoje}T13:30:00+00:00"},
+   
+        {"fixture_id": 1012, "campeonato": "Bundesliga 2",      "liga_id": 79, "time_casa": "Hannover",          "time_visitante": "Kaiserslautern",  "horario": f"{hoje}T13:30:00+00:00"},
+        {"fixture_id": 1013, "campeonato": "Brasileirao Serie A", "liga_id": 71, "time_casa": "Flamengo",         "time_visitante": "Palmeiras",       "horario": f"{hoje}T19:00:00-03:00"},
+        {"fixture_id": 1014, "campeonato": "Brasileirao Serie A", "liga_id": 71, "time_casa": "Atletico Mineiro", "time_visitante": "Corinthians",     "horario": f"{hoje}T21:00:00-03:00"},
+        {"fixture_id": 1015, "campeonato": "Brasileirao Serie B", "liga_id": 72, "time_casa": "Mirassol",         "time_visitante": "Sport Recife",    "horario": f"{hoje}T19:00:00-03:00"},
+        {"fixture_id": 1016, "campeonato": "Brasileirao Serie B", "liga_id": 72, "time_casa": "Goias",            "time_visitante": "Santos",          "horario": f"{hoje}T21:00:00-03:00"},
     ]
-
 
 def _odds_simuladas() -> dict:
     return {
