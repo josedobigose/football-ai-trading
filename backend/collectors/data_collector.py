@@ -181,24 +181,23 @@ def _jogos_exemplo() -> list[dict]:
 
 def _odds_simuladas() -> dict:
     return {
-        "odd_lay_goleada_casa": round(random.uniform(2.0, 5.0), 2),
-        "odd_lay_goleada_visitante": round(random.uniform(2.5, 7.0), 2),
-        "odd_lay_0x0": round(random.uniform(1.3, 3.0), 2),
+        "odd_lay_goleada_casa": round(random.uniform(3.0, 6.0), 2),
+        "odd_lay_goleada_visitante": round(random.uniform(4.0, 8.0), 2),
+        "odd_lay_0x0": round(random.uniform(2.0, 3.5), 2),
     }
-
 
 def _estatisticas_simuladas() -> dict:
     return {
-        "media_gols_marcados_casa": round(random.uniform(1.2, 2.8), 2),
-        "media_gols_sofridos_casa": round(random.uniform(0.8, 1.8), 2),
-        "media_gols_marcados_visitante": round(random.uniform(1.0, 2.5), 2),
-        "media_gols_sofridos_visitante": round(random.uniform(0.9, 2.0), 2),
-        "xg_casa": round(random.uniform(1.2, 2.5), 2),
-        "xg_visitante": round(random.uniform(1.0, 2.2), 2),
-        "historico_goleadas_casa": random.randint(0, 2),
-        "historico_goleadas_visitante": random.randint(0, 2),
-        "historico_0x0_casa": random.randint(0, 2),
-        "historico_0x0_visitante": random.randint(0, 2),
-        "elo_casa": round(random.uniform(1500, 1900), 0),
-        "elo_visitante": round(random.uniform(1450, 1850), 0),
+        "media_gols_marcados_casa": round(random.uniform(1.8, 2.8), 2),
+        "media_gols_sofridos_casa": round(random.uniform(1.0, 1.6), 2),
+        "media_gols_marcados_visitante": round(random.uniform(1.5, 2.5), 2),
+        "media_gols_sofridos_visitante": round(random.uniform(1.0, 1.8), 2),
+        "xg_casa": round(random.uniform(1.6, 2.5), 2),
+        "xg_visitante": round(random.uniform(1.3, 2.2), 2),
+        "historico_goleadas_casa": random.randint(0, 1),
+        "historico_goleadas_visitante": random.randint(0, 1),
+        "historico_0x0_casa": random.randint(0, 1),
+        "historico_0x0_visitante": random.randint(0, 1),
+        "elo_casa": round(random.uniform(1600, 1900), 0),
+        "elo_visitante": round(random.uniform(1550, 1850), 0),
     }
